@@ -1,0 +1,3 @@
+﻿namespace NovaPdf.Reporting.HtmlTemplate;
+
+
