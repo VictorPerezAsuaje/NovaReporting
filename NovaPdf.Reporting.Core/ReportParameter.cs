@@ -6,7 +6,7 @@ public interface IReportParameter
     object Value { get; }
 }
 
-public record ReportParameter<T>(string Name, T Value) : IReportParameter where T : class
+public record ReportParameter<T>(string Name, T Value) : IReportParameter
 {
     object IReportParameter.Value => Value;
 }

@@ -6,4 +6,9 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\NovaPdf.Reporting.Core\NovaPdf.Reporting.Core.csproj" />
+    <ProjectReference Include="..\NovaPdf.Reporting.Razor\NovaPdf.Reporting.Razor.csproj" />
+  </ItemGroup>
+
 </Project>

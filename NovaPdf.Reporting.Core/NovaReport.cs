@@ -1,4 +1,5 @@
-﻿using Microsoft.Playwright;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Playwright;
 
 namespace NovaPdf.Reporting.Core;
 
@@ -7,6 +8,7 @@ public interface INovaReport
     bool IsPreview { get; set; }
     string Name { get; }
     ReportLayout Layout { get; }
+    ReportFormat Format { get; }
     Dictionary<string, IReportParameter> Parameters { get; }
     Dictionary<string, IReportDataSet> DataSets { get; }
     void Init();
@@ -14,10 +16,10 @@ public interface INovaReport
 
     void AddDataSet<T>(T dataset) where T : class, IReportDataSet;
     void AddParameter<T>(T parameter) where T : class, IReportParameter;
-    T GetParameter<T>(string name) where T : class, IReportParameter;
-    T GetDataSet<T>(string name) where T : class, IReportDataSet;
+    T GetParameter<T>(string name);
+    T GetDataSet<T>() where T : class, IReportDataSet;
     
-    Task<byte[]> GeneratePdf(Action<NovaReportRenderingData> options);
+    Task<Result<byte[]>> GeneratePdfAsync(Action<NovaReportRenderingData> options);
 }
 
 public abstract class NovaReport : INovaReport
@@ -25,13 +27,25 @@ public abstract class NovaReport : INovaReport
     public bool IsPreview { get; set; } = false;
     public abstract string Name { get; }
     public ReportLayout Layout { get; protected set; } = ReportLayout.Vertical;
+    public ReportFormat Format { get; protected set; } = ReportFormat.A4;
     public Dictionary<string, IReportParameter> Parameters { get; protected set; } = [];
     public Dictionary<string, IReportDataSet> DataSets { get; protected set; } = [];
+    protected IServiceProvider _provider { get; set; }
 
-    protected NovaReport() { }
-    public abstract void Init();
-    public abstract Result Validate();
-    
+    public NovaReport()
+    {
+        Init();
+    }
+    public NovaReport(IServiceProvider provider) {
+        _provider = provider;
+        Init();
+    }
+    public virtual void Init() { }
+    public virtual Result Validate() => Result.Ok();
+
+    protected T GetService<T>() where T : notnull
+        => _provider.GetRequiredService<T>();
+
     public void AddParameter<T>(T parameter) where T : class, IReportParameter
     {
         if (Parameters.ContainsKey(parameter.Name))
@@ -40,12 +54,12 @@ public abstract class NovaReport : INovaReport
         Parameters.Add(parameter.Name, parameter);
     }
 
-    public T GetParameter<T>(string name) where T : class, IReportParameter
+    public T GetParameter<T>(string name)
     {
-        if (Parameters.ContainsKey(name))
+        if (!Parameters.ContainsKey(name))
             throw new Exception($"A parameter with the name '{name}' does not exist for the Report '{Name}'");
 
-        return (T)Parameters[name];
+        return (T)Parameters[name].Value;
     }
 
     public void AddDataSet<T>(T dataset) where T : class, IReportDataSet
@@ -56,16 +70,20 @@ public abstract class NovaReport : INovaReport
         DataSets.Add(typeof(T).Name, dataset);
     }
 
-    public T GetDataSet<T>(string name) where T : class, IReportDataSet
+    public T GetDataSet<T>() where T : class, IReportDataSet
     {
-        if (DataSets.ContainsKey(name))
-            throw new Exception($"A dataset with the name '{name}' does not exist for the Report '{Name}'");
+        if (!DataSets.ContainsKey(typeof(T).Name))
+            throw new Exception($"A dataset with the name '{typeof(T).Name}' does not exist for the Report '{Name}'");
 
-        return (T)DataSets[name];
+        return (T)DataSets[typeof(T).Name];
     }
 
-    public async Task<byte[]> GeneratePdf(Action<NovaReportRenderingData> options)
+    public async Task<Result<byte[]>> GeneratePdfAsync(Action<NovaReportRenderingData> options)
     {
+        Result validationResult = Validate();
+        if (validationResult.IsFailure)
+            return Result.Fail<byte[]>(validationResult.Error);
+
         NovaReportRenderingData data = new();
         options(data);
 
@@ -74,15 +92,16 @@ public abstract class NovaReport : INovaReport
         var page = await browser.NewPageAsync();
 
         await page.EmulateMediaAsync(new PageEmulateMediaOptions { Media = Media.Print });
-        await page.SetContentAsync(data.Html, new PageSetContentOptions { WaitUntil = WaitUntilState.Load });
+        await page.SetContentAsync(data.Html, new PageSetContentOptions { WaitUntil = WaitUntilState.NetworkIdle });
 
-        return await page.PdfAsync(new PagePdfOptions
+        byte[] pdf = await page.PdfAsync(new PagePdfOptions
         {
-            Format = ReportFormat.A4,
+            Format = Format,
             Landscape = Layout == ReportLayout.Horizontal,
             DisplayHeaderFooter = true,
             HeaderTemplate = data.Header,
             FooterTemplate = data.Footer,
+            PrintBackground = true,
             Margin = new Margin 
             { 
                 Top = $"{data.MarginTop}px",
@@ -91,5 +110,7 @@ public abstract class NovaReport : INovaReport
                 Left = $"{data.MarginLeft}px"
             }
         });
+
+        return Result.Ok(pdf);
     }
 }

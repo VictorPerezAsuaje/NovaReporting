@@ -27,6 +27,8 @@ public class Result
     public static Result Fail(string error) => new Result(false, error);
     public static Result<T> Fail<T>(string error) where T : class
         => new Result<T>(default, false, error);
+    public static Result<T> Fail<T>(Result result) where T : class
+        => new Result<T>(default, false, result.Error, result.ValidationErrors);
 
     public static Result ValidationFailed(IEnumerable<ValidationError> validationErrors)
             => new Result(false, string.Empty, validationErrors.ToList());

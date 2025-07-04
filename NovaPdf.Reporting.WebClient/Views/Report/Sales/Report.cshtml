@@ -1,0 +1,108 @@
+﻿@using NovaPdf.Reporting.WebClient.Reports.Sales
+@inherits BaseReportView<SalesNovaReport>
+
+@{
+    Layout = "_ReportLayout";
+
+}
+
+<h5 class="mt-4">Sales Summary</h5>
+<table class="table mt-4" style="font-size:0.9rem;">
+    <thead>
+        <tr>
+            <th>Month</th>
+            <th class="text-end">Total Sales</th>
+            <th class="text-end">Returns</th>
+            <th class="text-end">Net Sales</th>
+            <th class="text-end">New Customers</th>
+        </tr>
+    </thead>
+    <tbody>
+        @{
+            decimal lastTotalSales = 0;
+            decimal lastReturns = 0;
+            decimal lastNewCustomers = 0;
+        }
+        @foreach (var item in DataSet<SalesSummaryDS>().Data)
+        {
+            bool upSales = item.TotalSales > lastTotalSales;
+            bool upReturns = item.TotalReturns > lastReturns;
+            bool upNewCustomers = item.NewCustomers > lastNewCustomers;
+            lastTotalSales = item.TotalSales;
+            lastReturns = item.NetSales;
+            lastNewCustomers = item.NewCustomers;
+
+            <tr>
+                <td>@item.Month</td>
+                <td class="text-end">
+                    @item.TotalSales.ToString("N2")€
+                    <i class="ms-2 fa-solid @(upSales ? "fa-caret-up text-success" : "fa-caret-down text-danger")"></i>
+                </td>
+                <td class="text-end">
+                    @item.TotalReturns.ToString("N2")€
+                    <i class="ms-2 fa-solid @(upReturns ? "fa-caret-up text-success" : "fa-caret-down text-danger")"></i>
+                </td>
+                <td class="text-end">@item.NetSales.ToString("N2")€</td>
+                <td class="text-end">
+                    @item.NewCustomers
+                    <i class="ms-2 fa-solid @(upNewCustomers ? "fa-caret-up text-success" : "fa-caret-down text-danger")"></i>
+                </td>
+            </tr>
+        }
+
+        @{
+            var items = DataSet<SalesSummaryDS>().Data;
+        }
+
+        <tr>
+            <td class="text-end fw-bold">Total Q2</td>
+            <td class="text-end fw-bold @(items.Sum(x => x.TotalSales) < Parameter<decimal>("SalesTarget") ? "bg-danger" : "bg-success")" style="--bs-bg-opacity: .2;">
+                @items.Sum(x => x.TotalSales).ToString("N2")€ / @(Parameter<decimal>("SalesTarget").ToString("N2"))€
+            </td>
+            <td class="text-end">
+                @items.Sum(x => x.TotalReturns).ToString("N2")€
+            </td>
+            <td class="text-end">@items.Sum(x => x.NetSales).ToString("N2")€</td>
+            <td class="text-end">
+                @items.Sum(x => x.NewCustomers)
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+<h5 class="mt-5">Product Performace</h5>
+<table class="table mt-4" style="font-size:0.9rem;">
+    <thead>
+        <tr>
+            <th>Product ID</th>
+            <th>Product Name</th>
+            <th class="text-end">Units Sold</th>
+            <th class="text-end">Revenue</th>
+            <th class="text-end">Avg Price</th>
+            <th class="text-end">Return Rate</th>
+        </tr>
+    </thead>
+    <tbody>
+        @{
+            var topPerforming = DataSet<ProductPerformanceDS>().Data.MaxBy(x => x.Revenue).ProductId;
+        }
+        @foreach (var item in DataSet<ProductPerformanceDS>().Data)
+        {
+            <tr>
+                <td>                    
+                    @item.ProductId
+
+                    @if (item.ProductId == topPerforming)
+                    {
+                        <i class="ms-2 fa-solid fa-star text-warning"></i>
+                    }
+                </td>
+                <td>@item.ProductName</td>
+                <td class="text-end">@item.UnitsSold</td>
+                <td class="text-end">@item.Revenue.ToString("N2") €</td>
+                <td class="text-end">@item.AvgPrice €</td>
+                <td class="text-end">@((item.ReturnRate * 100).ToString("N2"))%</td>
+            </tr>
+        }
+    </tbody>
+</table>
