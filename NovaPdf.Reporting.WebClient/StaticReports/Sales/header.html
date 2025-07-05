@@ -1,0 +1,35 @@
+﻿
+<style>
+    .header {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        width: 100%;
+        font-size: 10px;
+        padding: 0 24px;
+        border-bottom: 1px #f1f1f1 solid;
+    }
+</style>
+
+<div class="header">
+    <div style="flex:1; display:flex; flex-direction:column; gap: 8px;">
+        <img src='data:image/svg+xml;base64,{{ Logo }}' alt="Logo NovaReporting" style="height:auto; width: 150px;" />
+        <h6 style="width: 100%; text-align: left;">{{ CompanyName }}</h6>
+    </div>
+
+    <div style="flex:1; display:flex; flex-direction: column; gap: 16px; text-align:center;">
+        <h4 style="border:2px solid #ddd; padding: 8px; font-size: 20px; font-weight:bold; text-align:center;">
+            {{ ReportTitle }}
+        </h4>
+        <p>From {{ DateStart }} to {{ DateEnd }}</p>
+    </div>
+
+    <div style="flex:1; text-align:right;">
+        <p>{{ CurrentDate }} </p>
+        <p>
+            Page <span class="pageNumber"></span> of <span class="totalPages"></span>
+        </p>
+    </div>
+</div>

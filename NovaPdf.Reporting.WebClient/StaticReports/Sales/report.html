@@ -1,0 +1,44 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr" crossorigin="anonymous">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" rel="stylesheet">
+</head>
+<body class="p-4">
+    <h5>Sales Summary</h5>
+    <table class="table mt-4" style="font-size:0.9rem;">
+        <thead>
+            <tr>
+                <th>Month</th>
+                <th class="text-end">Total Sales</th>
+                <th class="text-end">Returns</th>
+                <th class="text-end">Net Sales</th>
+                <th class="text-end">New Customers</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{ SalesSummaryRows }}
+        </tbody>
+    </table>
+
+    <h5 class="mt-5">Product Performace</h5>
+    <table class="table mt-4" style="font-size:0.9rem;">
+        <thead>
+            <tr>
+                <th>Product ID</th>
+                <th>Product Name</th>
+                <th class="text-end">Units Sold</th>
+                <th class="text-end">Revenue</th>
+                <th class="text-end">Avg Price</th>
+                <th class="text-end">Return Rate</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{ ProductPerformanceRows }}
+        </tbody>
+    </table>
+
+</body>
+</html>

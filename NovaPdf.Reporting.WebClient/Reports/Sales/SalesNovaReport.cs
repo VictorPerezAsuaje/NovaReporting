@@ -5,12 +5,14 @@ namespace NovaPdf.Reporting.WebClient.Reports.Sales;
 public class SalesNovaReport : NovaReport
 {
     public override string Name => "Sales";
+
     public SalesNovaReport(IServiceProvider provider) : base(provider)
     {
     }
 
     public override void Init()
     {
+        Layout = ReportLayout.Horizontal;
         var env = GetService<IWebHostEnvironment>();
         string logoPath = Path.Combine(env.WebRootPath, "img", "logo.svg");
 
@@ -20,7 +22,9 @@ public class SalesNovaReport : NovaReport
         AddParameter(new ReportParameter<string>("Logo", Convert.ToBase64String(File.ReadAllBytes(logoPath))));
         AddParameter(new ReportParameter<string>("ReportTitle", "Q2 2025 Sales Performance"));
         AddParameter(new ReportParameter<string>("CompanyName", "Nova Reporting"));
-        AddParameter(new ReportParameter<DateRange>("DateRange", new DateRange(new DateTime(2025, 1, 1), new DateTime(2025, 6, 25))));
+        AddParameter(new ReportParameter<DateTime>("CurrentDate", DateTime.UtcNow));
+        AddParameter(new ReportParameter<DateTime>("DateStart", new DateTime(2025, 1, 1)));
+        AddParameter(new ReportParameter<DateTime>("DateEnd", new DateTime(2025, 1, 1)));
         AddParameter(new ReportParameter<decimal>("SalesTarget", 1500000m));
 
         var salesSummary = new SalesSummaryDS
@@ -47,17 +51,5 @@ public class SalesNovaReport : NovaReport
         };
 
         AddDataSet(productPerformance);
-    }
-}
-
-public class DateRange
-{
-    public DateTime Start { get; }
-    public DateTime End { get; }
-
-    public DateRange(DateTime start, DateTime end)
-    {
-        Start = start;
-        End = end;
     }
 }

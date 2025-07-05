@@ -7,6 +7,24 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Include="StaticReports\Sales\header.html">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="StaticReports\Sales\product-row.html">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="StaticReports\Sales\total-sale-row.html">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="StaticReports\Sales\sale-row.html">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="StaticReports\Sales\report.html">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\NovaPdf.Reporting.Core\NovaPdf.Reporting.Core.csproj" />
     <ProjectReference Include="..\NovaPdf.Reporting.Razor\NovaPdf.Reporting.Razor.csproj" />
   </ItemGroup>

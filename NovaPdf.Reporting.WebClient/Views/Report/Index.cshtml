@@ -6,8 +6,13 @@
     <img src="~/img/logo.svg" class="my-5" style="width: 250px; height:auto;" />
 
     <h3>Sales Report 2025 Q2</h3>
-    <form asp-controller="Report" asp-action="DownloadSales" class="d-flex gap-4 flex-row align-items-center">
+    <div class="d-flex gap-4 flex-row align-items-center">
         <a asp-controller="Report" asp-action="PreviewSales" target="_blank">Preview</a>
-        <button class="btn btn-outline-primary">PDF</button>
-    </form>
+        <form asp-controller="Report" asp-action="DownloadSales">
+            <button class="btn btn-outline-primary">Razor PDF</button>
+        </form>
+        <form asp-controller="Report" asp-action="DownloadStaticSales">
+            <button class="btn btn-outline-primary">HTML PDF</button>
+        </form>
+    </div>
 </div>

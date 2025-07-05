@@ -29,11 +29,11 @@
         <h4 style="border:2px solid #ddd; padding: 8px; font-size: 20px; font-weight:bold; text-align:center;">
             @(Parameter<string>("ReportTitle"))
         </h4>
-        <p>From @(Parameter<DateRange>("DateRange").Start.ToString("dd/MM/yyyy")) to @(Parameter<DateRange>("DateRange").End.ToString("dd/MM/yyyy"))</p>
+        <p>From @(Parameter<DateTime>("DateStart").ToString("dd/MM/yyyy")) to @(Parameter<DateTime>("DateEnd").ToString("dd/MM/yyyy"))</p>
     </div>
 
     <div style="flex:1; text-align:right;">
-        <p>@DateTime.UtcNow.ToString("dd MMMM yyyy, HH:mm:ss")</p>
+        <p>@(Parameter<DateTime>("CurrentDate").ToString("dd MMMM yyyy, HH:mm:ss"))</p>
         <p>
             Page @if (Model.IsPreview) { <span>1</span> } else { <span class="pageNumber"></span> } of 
             @if (Model.IsPreview) { <span>1</span> } else { <span class="totalPages"></span> }
