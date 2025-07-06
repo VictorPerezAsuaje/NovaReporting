@@ -34,7 +34,9 @@ If your project is not a .NET Web-based Application, You can also generate repor
 
 You can see an example of using static HTML here: [Static HTML](#static-html-example)
 
-For this last use-case scenario, I'm developing a static HTML Templating Engine to help you if you find it fits your needs.
+And of course you can choose another HTML Template Renderer you want, in fact I've also added an example using Scriban as well, so that you are not bound to a Web Application nor have to abandon all the comodities that the Razor Engine provides.
+
+You can see an example of using static HTML here: [Platform-Agnostic HTML Template Renderer Example (Scriban)](#platform-agnostic-html-template-renderer-example)
 
 The following scenarios are simple ones, with as little abstractions as possible for it to show as much of the important code as possible. Feel free to create the abstractions you need, group, extract or refactor it... The sky is the limit 🚀
 
