@@ -1,6 +1,6 @@
 ﻿# NovaReporting
 
-NovaReporting began as a proof of concept on my journey to move away from outdated, heavy, and often costly reporting systems like Crystal Reports or RDLs. It aims to be lightweight, cross-platform, and developer-friendly.
+NovaReporting began as a proof of concept on my journey to move away from outdated, heavy, not cross-platform and/or often costly reporting systems like Crystal Reports or RDLs. It aims to be lightweight, cross-platform, and developer-friendly.
 
 > 🚀 NovaReporting uses HTML + CSS to generate PDF reports — making it intuitive, flexible, and perfect for fast iterations and cross-platform environments.
 
@@ -17,7 +17,7 @@ The core idea is to simplify report generation by using technologies most develo
 * ✅ Easy to learn – Uses standard HTML/CSS for report design.
 * 🔁 Live previews – See changes immediately during development.
 * 🧪 Hot reload support – Works seamlessly with Visual Studio / VS Code.
-* 🎨 Style freely – Use CSS frameworks and icon libraries like Bootstrap or Font Awesome.
+* 🎨 Style freely – Use CSS frameworks and icon libraries like Bootstrap or Font Awesome (used for the sample pdfs shown here).
 * 📄 Cross-platform – Ideal for modern .NET Core web applications.
 
 ![Sample Report Preview](sample-report-preview.jpeg)
@@ -170,8 +170,6 @@ public async Task<IActionResult> DownloadSales()
     </table>
 </body>
 </html>
-
-### EXAMPLE OF THE ENDPOINT ###
 ```
 
 
