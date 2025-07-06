@@ -13,13 +13,16 @@
     <Content Include="StaticReports\Sales\product-row.html">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="StaticReports\Sales\report.html">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="StaticReports\Sales\total-sale-row.html">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="StaticReports\Sales\sale-row.html">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="StaticReports\Sales\report.html">
+    <Content Include="StaticReports\Sales\layout.html">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

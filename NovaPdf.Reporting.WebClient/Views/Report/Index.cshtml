@@ -6,13 +6,26 @@
     <img src="~/img/logo.svg" class="my-5" style="width: 250px; height:auto;" />
 
     <h3>Sales Report 2025 Q2</h3>
-    <div class="d-flex gap-4 flex-row align-items-center">
-        <a asp-controller="Report" asp-action="PreviewSales" target="_blank">Preview</a>
-        <form asp-controller="Report" asp-action="DownloadSales">
-            <button class="btn btn-outline-primary">Razor PDF</button>
-        </form>
-        <form asp-controller="Report" asp-action="DownloadStaticSales">
-            <button class="btn btn-outline-primary">HTML PDF</button>
-        </form>
+    <div class="d-flex gap-4 flex-row align-items-center mt-4">
+        <div>
+            <h5>Razor</h5>
+            <div class="d-flex flex-row gap-2 align-items-center">
+                <a asp-controller="Report" asp-action="PreviewSales" target="_blank" class="btn btn-outline-secondary">Preview</a>
+                <form asp-controller="Report" asp-action="DownloadSales">
+                    <button class="btn btn-outline-primary">PDF</button>
+                </form>
+            </div>
+        </div>
+
+        <div>
+            <h5>Static HTML</h5>
+            <div class="d-flex flex-row gap-2 align-items-center">
+                <a asp-controller="Report" asp-action="PreviewStaticSales" target="_blank" class="btn btn-outline-secondary">Preview</a>
+                <form asp-controller="Report" asp-action="DownloadStaticSales">
+                    <button class="btn btn-outline-primary">PDF</button>
+                </form>
+            </div>
+        </div>
+        
     </div>
 </div>
