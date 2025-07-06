@@ -2,8 +2,11 @@ using Microsoft.AspNetCore.Mvc;
 using NovaPdf.Reporting.Core;
 using NovaPdf.Reporting.Razor;
 using NovaPdf.Reporting.WebClient.Reports.Sales;
+using Scriban.Runtime;
+using Scriban;
 using System.Diagnostics;
 using System.Reflection;
+using Microsoft.Playwright;
 
 namespace NovaPdf.Reporting.WebClient.Controllers;
 
@@ -26,8 +29,10 @@ public class ReportController : Controller
         return View();
     }
 
+    #region RAZOR_SALES
+
     [HttpGet]
-    [Route("sales")]
+    [Route("previews/sales")]
     public async Task<IActionResult> PreviewSales()
     {
         SalesNovaReport report = new SalesNovaReport(HttpContext.RequestServices);
@@ -57,11 +62,15 @@ public class ReportController : Controller
             return View("Index");
         }
 
-        return File(result.Value, "application/pdf", "sample.pdf");
+        return File(result.Value, "application/pdf", "razor-sales.pdf");
     }
 
+    #endregion RAZOR_SALES
+
+    #region STATIC_SALES 
+
     [HttpGet]
-    [Route("preview-static-sales")]
+    [Route("previews/static-sales")]
     public async Task<IActionResult> PreviewStaticSales()
     {
         SalesNovaReport salesReport = new SalesNovaReport(HttpContext.RequestServices);
@@ -251,6 +260,114 @@ public class ReportController : Controller
             return View("Index");
         }
 
-        return File(result.Value, "application/pdf", "sample.pdf");
+        return File(result.Value, "application/pdf", "static-html-sample.pdf");
     }
+
+    #endregion STATIC_SALES
+
+    #region SCRIBAN_SALES
+
+    [HttpGet]
+    [Route("previews/scriban-sales")]
+    public async Task<IActionResult> PreviewScribanSales()
+    {
+        // Syntax Docs: https://github.com/scriban/scriban/blob/master/doc/language.md
+        SalesNovaReport salesReport = new SalesNovaReport(HttpContext.RequestServices);
+        salesReport.IsPreview = true;
+
+        var templateContext = new TemplateContext();
+
+        var helperFunctions = new ScriptObject();
+        helperFunctions.Import("date_format", new Func<DateTime, string, string>((dt, format) => dt.ToString(format)));
+        helperFunctions.Import("string_format", new Func<int, string, string>((dt, format) => dt.ToString(format)));
+        helperFunctions.Import("string_format", new Func<decimal, string, string>((dt, format) => dt.ToString(format)));
+        templateContext.PushGlobal(helperFunctions);
+
+        var globals = new ScriptObject();
+
+        // Transformed parameters into key-value pairs for simplicity
+        globals["parameters"] = salesReport.Parameters.ToDictionary(p => p.Key, p => p.Value.Value);
+        globals["datasets"] = salesReport.DataSets;
+        globals["model"] = salesReport;
+        templateContext.PushGlobal(globals);
+
+        string currentDir = Directory.GetCurrentDirectory();
+        string reportFolder = Path.Combine(currentDir, "StaticReports", "ScribanSales");
+        templateContext.TemplateLoader = new ScribanFileTemplateLoader(reportFolder);
+
+        string layout = System.IO.File.ReadAllText(Path.Combine(reportFolder, "layout.html"));
+        var template = Template.Parse(layout);
+
+        if (template.HasErrors)
+        {
+            var errors = string.Join("\n", template.Messages.Select(m => m.Message));
+            return Content($"Template parsing errors:\n{errors}", "text/plain");
+        }
+
+        return Content(template.Render(templateContext), "text/html");
+    }
+
+    [HttpPost]
+    [Route("scriban-sales")]
+    public async Task<IActionResult> DownloadScribanSales()
+    {
+        // Syntax Docs: https://github.com/scriban/scriban/blob/master/doc/language.md
+        SalesNovaReport salesReport = new SalesNovaReport(HttpContext.RequestServices);
+
+        var templateContext = new TemplateContext();
+
+        var helperFunctions = new ScriptObject();
+        helperFunctions.Import("date_format", new Func<DateTime, string, string>((dt, format) => dt.ToString(format)));
+        helperFunctions.Import("string_format", new Func<int, string, string>((dt, format) => dt.ToString(format)));
+        helperFunctions.Import("string_format", new Func<decimal, string, string>((dt, format) => dt.ToString(format)));
+        templateContext.PushGlobal(helperFunctions);
+
+        var globals = new ScriptObject();
+
+        // Transformed parameters into key-value pairs for simplicity
+        globals["parameters"] = salesReport.Parameters.ToDictionary(p => p.Key, p => p.Value.Value);
+        globals["datasets"] = salesReport.DataSets;
+        globals["model"] = salesReport;
+        templateContext.PushGlobal(globals);
+
+        string currentDir = Directory.GetCurrentDirectory();
+        string reportFolder = Path.Combine(currentDir, "StaticReports", "ScribanSales");
+        templateContext.TemplateLoader = new ScribanFileTemplateLoader(reportFolder);
+
+        string layout = System.IO.File.ReadAllText(Path.Combine(reportFolder, "layout.html"));
+        string header = System.IO.File.ReadAllText(Path.Combine(reportFolder, "header.html"));
+
+        var reportTemplate = Template.Parse(layout);
+        if (reportTemplate.HasErrors)
+        {
+            TempData["Error"] = reportTemplate.Messages;
+            return View("Index");
+        }
+
+        var headerTemplate = Template.Parse(header);
+        if (headerTemplate.HasErrors)
+        {
+            TempData["Error"] = headerTemplate.Messages;
+            return View("Index");
+        }
+
+        var renderedHeader = headerTemplate.Render(templateContext);
+        var renderedReport = reportTemplate.Render(templateContext);
+        var result = await salesReport.GeneratePdfAsync(x =>
+        {
+            x.Header = renderedHeader;
+            x.Html = renderedReport;
+            x.MarginTop = 175;
+        });
+
+        if (result.IsFailure)
+        {
+            TempData["Error"] = result.Error;
+            return View("Index");
+        }
+
+        return File(result.Value, "application/pdf", "scriban-sales.pdf");
+    }
+
+    #endregion SCRIBAN_SALES
 }

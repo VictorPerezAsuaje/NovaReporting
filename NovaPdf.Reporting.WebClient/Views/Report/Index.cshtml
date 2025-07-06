@@ -26,6 +26,16 @@
                 </form>
             </div>
         </div>
-        
+
+        <div>
+            <h5>Scriban Static HTML</h5>
+            <div class="d-flex flex-row gap-2 align-items-center">
+                <a asp-controller="Report" asp-action="PreviewScribanSales" target="_blank" class="btn btn-outline-secondary">Preview</a>
+                <form asp-controller="Report" asp-action="DownloadScribanSales">
+                    <button class="btn btn-outline-primary">PDF</button>
+                </form>
+            </div>
+        </div>
+
     </div>
 </div>

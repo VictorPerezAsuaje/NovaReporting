@@ -36,6 +36,8 @@ You can see an example of using static HTML here: [Static HTML](#static-html-exa
 
 For this last use-case scenario, I'm developing a static HTML Templating Engine to help you if you find it fits your needs.
 
+The following scenarios are simple ones, with as little abstractions as possible for it to show as much of the important code as possible. Feel free to create the abstractions you need, group, extract or refactor it... The sky is the limit 🚀
+
 ### Razor Example
 
 **Razor View:**
@@ -144,6 +146,8 @@ public async Task<IActionResult> DownloadSales()
 **HTML Template:**
 
 ```
+<!--- ### layout.html ### --->
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -170,6 +174,25 @@ public async Task<IActionResult> DownloadSales()
     </table>
 </body>
 </html>
+
+<!--- ### sale-row.html ### --->
+
+<tr>
+    <td>{{ Month }}</td>
+    <td class="text-end">
+        {{ TotalSales }} €
+        <i class="ms-2 fa-solid {{ TotalSalesIconClass }}"></i>
+    </td>
+    <td class="text-end">
+        {{ TotalReturns }} €
+        <i class="ms-2 fa-solid {{ TotalReturnsIconClass }}"></i>
+    </td>
+    <td class="text-end">{{ NetSales }} €</td>
+    <td class="text-end">
+        {{ NewCustomers }}
+        <i class="ms-2 fa-solid {{ NewCustomersIconClass }}"></i>
+    </td>
+</tr>
 ```
 
 
@@ -237,6 +260,146 @@ public async Task<IActionResult> DownloadStaticSales()
 }
 ```
 
+### Platform-Agnostic HTML Template Renderer Example
+
+For this example I opted for Scriban as my Template renderer, but you can choose whichever fits your needs. You can check out their amazing library here: (Scriban)[https://github.com/scriban/scriban/blob/master/doc/language.md].
+
+Scriban allows me to not depend heavily on the Razor Rendering Engine, so this approach makes it cross-platform (Web, Desktop, Mobile, etc.) whilst harnessing all the power of C# and a more extensible and extensive syntax than what you would have to do in the Static HTML Example.
+
+
+**HTML Template:**
+
+```
+<h5>Sales Summary</h5>
+<table class="table mt-4" style="font-size:0.9rem;">
+    <thead>
+        <tr>
+            <th>Month</th>
+            <th class="text-end">Total Sales</th>
+            <th class="text-end">Returns</th>
+            <th class="text-end">Net Sales</th>
+            <th class="text-end">New Customers</th>
+        </tr>
+    </thead>
+    <tbody>
+        {{-
+          # last values for comparisons
+          last_total_sales = 0
+          last_returns = 0
+          last_new_customers = 0
+        -}}
+
+        {{ for item in datasets.SalesSummaryDS.data }}
+        {{-
+        up_sales = item.total_sales > last_total_sales
+        up_returns = item.total_returns > last_returns
+        up_new_customers = item.new_customers > last_new_customers
+        last_total_sales = item.total_sales
+        last_returns = item.total_returns
+        last_new_customers = item.new_customers
+        -}}
+
+        <tr>
+            <td>{{ item.month }}</td>
+            <td class="text-end">
+                {{ item.total_sales | string_format "N2" }}€
+                <i class="ms-2 fa-solid {{ up_sales ? "fa-caret-up text-success" : "fa-caret-down text-danger" }}"></i>
+            </td>
+            <td class="text-end">
+                {{ item.total_returns | string_format "N2" }}€
+                <i class="ms-2 fa-solid {{ up_returns ? "fa-caret-up text-success" : "fa-caret-down text-danger" }}"></i>
+            </td>
+            <td class="text-end">
+                {{ item.total_sales - item.total_returns | string_format "N2" }}€
+            </td>
+            <td class="text-end">
+                {{ item.new_customers }}
+                <i class="ms-2 fa-solid {{ up_new_customers ? "fa-caret-up text-success" : "fa-caret-down text-danger" }}"></i>
+            </td>
+        </tr>
+        {{ end }}
+
+        <tr>
+            <td class="text-end fw-bold">Total Q2</td>
+            <td class="text-end fw-bold {{ datasets.SalesSummaryDS.sum_total_sales < parameters.SalesTarget ? "bg-danger" : "bg-success" }}" style="--bs-bg-opacity: .2;">
+                {{ datasets.SalesSummaryDS.sum_total_sales | string_format "N2" }}€ / {{ parameters.SalesTarget | string_format "N2" }}€
+            </td>
+            <td class="text-end">{{ datasets.SalesSummaryDS.sum_total_returns | string_format "N2" }}€</td>
+            <td class="text-end">{{ datasets.SalesSummaryDS.sum_net_sales | string_format "N2" }}€</td>
+            <td class="text-end">{{ datasets.SalesSummaryDS.sum_new_customers }}</td>
+        </tr>
+    </tbody>
+</table>
+```
+
+
+**Controller Endpoint:**
+
+```
+[HttpPost]
+[Route("scriban-sales")]
+public async Task<IActionResult> DownloadScribanSales()
+{
+    // Syntax Docs: https://github.com/scriban/scriban/blob/master/doc/language.md
+    SalesNovaReport salesReport = new SalesNovaReport(HttpContext.RequestServices);
+
+    var templateContext = new TemplateContext();
+
+    var helperFunctions = new ScriptObject();
+    helperFunctions.Import("date_format", new Func<DateTime, string, string>((dt, format) => dt.ToString(format)));
+    helperFunctions.Import("string_format", new Func<int, string, string>((dt, format) => dt.ToString(format)));
+    helperFunctions.Import("string_format", new Func<decimal, string, string>((dt, format) => dt.ToString(format)));
+    templateContext.PushGlobal(helperFunctions);
+
+    var globals = new ScriptObject();
+
+    // Transformed parameters into key-value pairs for simplicity
+    globals["parameters"] = salesReport.Parameters.ToDictionary(p => p.Key, p => p.Value.Value);
+    globals["datasets"] = salesReport.DataSets;
+    globals["model"] = salesReport;
+    templateContext.PushGlobal(globals);
+
+    string currentDir = Directory.GetCurrentDirectory();
+    string reportFolder = Path.Combine(currentDir, "StaticReports", "ScribanSales");
+    templateContext.TemplateLoader = new ScribanFileTemplateLoader(reportFolder);
+
+    string layout = System.IO.File.ReadAllText(Path.Combine(reportFolder, "layout.html"));
+    string header = System.IO.File.ReadAllText(Path.Combine(reportFolder, "header.html"));
+
+    var reportTemplate = Template.Parse(layout);
+    if (reportTemplate.HasErrors)
+    {
+        TempData["Error"] = reportTemplate.Messages;
+        return View("Index");
+    }
+
+    var headerTemplate = Template.Parse(header);
+    if (headerTemplate.HasErrors)
+    {
+        TempData["Error"] = headerTemplate.Messages;
+        return View("Index");
+    }
+
+    var renderedHeader = headerTemplate.Render(templateContext);
+    var renderedReport = reportTemplate.Render(templateContext);
+    var result = await salesReport.GeneratePdfAsync(x =>
+    {
+        x.Header = renderedHeader;
+        x.Html = renderedReport;
+        x.MarginTop = 175;
+    });
+
+    if (result.IsFailure)
+    {
+        TempData["Error"] = result.Error;
+        return View("Index");
+    }
+
+    return File(result.Value, "application/pdf", "scriban-sales.pdf");
+}
+```
+
+
 ### 🔭 Roadmap
 
 Here are the planned features and improvements.
@@ -245,32 +408,13 @@ Here are the planned features and improvements.
 
 [ X ] Templating scenarios
 
-**Static HTML Templating Engine**
+**Static HTML**
 
 [ X ] Basic Templating scenarios
 
-[  ] Primitive property binding support
+**Cross-platform**
 
-[  ] Complex property binding support (objects)
-
-[  ] Looping support
-
-[  ] Conditional support
-
-[  ] Support for filters, formatters and other pipes through simple functions
-
-[  ] Error handling support
-
-[  ] Template inheritance support
-
-[  ] Partial template support
-
-[  ] Tokenization && parsing support
-
-[  ] Compiler / interpreter to evaluate templates
-
-[  ] CodeDOM compilation support
-
+[ X ] Templating scenarios
 
 ### 🙏 Acknowledgements
 

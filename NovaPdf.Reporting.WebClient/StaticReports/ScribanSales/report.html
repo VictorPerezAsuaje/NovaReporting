@@ -1,0 +1,91 @@
+﻿<h5>Sales Summary</h5>
+<table class="table mt-4" style="font-size:0.9rem;">
+    <thead>
+        <tr>
+            <th>Month</th>
+            <th class="text-end">Total Sales</th>
+            <th class="text-end">Returns</th>
+            <th class="text-end">Net Sales</th>
+            <th class="text-end">New Customers</th>
+        </tr>
+    </thead>
+    <tbody>
+        {{-
+          # last values for comparisons
+          last_total_sales = 0
+          last_returns = 0
+          last_new_customers = 0
+        -}}
+
+        {{ for item in datasets.SalesSummaryDS.data }}
+        {{-
+        up_sales = item.total_sales > last_total_sales
+        up_returns = item.total_returns > last_returns
+        up_new_customers = item.new_customers > last_new_customers
+        last_total_sales = item.total_sales
+        last_returns = item.total_returns
+        last_new_customers = item.new_customers
+        -}}
+
+        <tr>
+            <td>{{ item.month }}</td>
+            <td class="text-end">
+                {{ item.total_sales | string_format "N2" }}€
+                <i class="ms-2 fa-solid {{ up_sales ? "fa-caret-up text-success" : "fa-caret-down text-danger" }}"></i>
+            </td>
+            <td class="text-end">
+                {{ item.total_returns | string_format "N2" }}€
+                <i class="ms-2 fa-solid {{ up_returns ? "fa-caret-up text-success" : "fa-caret-down text-danger" }}"></i>
+            </td>
+            <td class="text-end">
+                {{ item.total_sales - item.total_returns | string_format "N2" }}€
+            </td>
+            <td class="text-end">
+                {{ item.new_customers }}
+                <i class="ms-2 fa-solid {{ up_new_customers ? "fa-caret-up text-success" : "fa-caret-down text-danger" }}"></i>
+            </td>
+        </tr>
+        {{ end }}
+
+        <tr>
+            <td class="text-end fw-bold">Total Q2</td>
+            <td class="text-end fw-bold {{ datasets.SalesSummaryDS.sum_total_sales < parameters.SalesTarget ? "bg-danger" : "bg-success" }}" style="--bs-bg-opacity: .2;">
+                {{ datasets.SalesSummaryDS.sum_total_sales | string_format "N2" }}€ / {{ parameters.SalesTarget | string_format "N2" }}€
+            </td>
+            <td class="text-end">{{ datasets.SalesSummaryDS.sum_total_returns | string_format "N2" }}€</td>
+            <td class="text-end">{{ datasets.SalesSummaryDS.sum_net_sales | string_format "N2" }}€</td>
+            <td class="text-end">{{ datasets.SalesSummaryDS.sum_new_customers }}</td>
+        </tr>
+    </tbody>
+</table>
+
+<h5 class="mt-5">Product Performance</h5>
+<table class="table mt-4" style="font-size:0.9rem;">
+    <thead>
+        <tr>
+            <th>Product ID</th>
+            <th>Product Name</th>
+            <th class="text-end">Units Sold</th>
+            <th class="text-end">Revenue</th>
+            <th class="text-end">Avg Price</th>
+            <th class="text-end">Return Rate</th>
+        </tr>
+    </thead>
+    <tbody>
+        {{ for item in datasets.ProductPerformanceDS.data }}
+        <tr>
+            <td>
+                {{ item.product_id }}
+                {{ if item.product_id == datasets.ProductPerformanceDS.top_performing_product_id }}
+                <i class="ms-2 fa-solid fa-star text-warning"></i>
+                {{ end }}
+            </td>
+            <td>{{ item.product_name }}</td>
+            <td class="text-end">{{ item.units_sold }}</td>
+            <td class="text-end">{{ item.revenue | string_format "N2" }} €</td>
+            <td class="text-end">{{ item.avg_price | string_format "N2" }} €</td>
+            <td class="text-end">{{ item.percentage_return_rate | string_format "N2" }} %</td>
+        </tr>
+        {{ end }}
+    </tbody>
+</table>

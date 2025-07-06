@@ -1,0 +1,35 @@
+﻿<style>
+    .header {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        width: 100%;
+        font-size: 10px;
+        padding: 0 24px;
+        border-bottom: 1px #f1f1f1 solid;
+    }
+</style>
+
+<div class="header">
+    <div style="flex:1; display:flex; flex-direction:column; gap: 8px;">
+        <img src="data:image/svg+xml;base64,{{ parameters.Logo }}" alt="Logo NovaReporting" style="height:auto; width: 150px;" />
+        <h6 style="width: 100%; text-align: left;">{{ parameters.CompanyName }}</h6>
+    </div>
+
+    <div style="flex:1; display:flex; flex-direction: column; gap: 16px; text-align:center;">
+        <h4 style="border:2px solid #ddd; padding: 8px; font-size: 20px; font-weight:bold; text-align:center;">
+            {{ parameters.ReportTitle }}
+        </h4>
+        <p>From {{ parameters.DateStart | date_format "dd/MM/yyyy" }} to {{ parameters.DateEnd | date_format "dd/MM/yyyy" }}</p>
+    </div>
+
+    <div style="flex:1; text-align:right;">
+        <p>{{ parameters.CurrentDate | date_format "dd MMMM yyyy, HH:mm:ss" }}</p>
+        <p>
+            Page {{ if model.is_preview }}1{{ else }}<span class="pageNumber"></span>{{ end }} of
+            {{ if model.is_preview }}1{{ else }}<span class="totalPages"></span>{{ end }}
+        </p>
+    </div>
+</div>
