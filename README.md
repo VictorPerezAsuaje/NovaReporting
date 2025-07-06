@@ -264,7 +264,7 @@ public async Task<IActionResult> DownloadStaticSales()
 
 ### Platform-Agnostic HTML Template Renderer Example
 
-For this example I opted for Scriban as my Template renderer, but you can choose whichever fits your needs. You can check out their amazing library here: (Scriban)[https://github.com/scriban/scriban/blob/master/doc/language.md].
+For this example I opted for Scriban as my Template renderer, but you can choose whichever fits your needs. You can check out their amazing library here: [Scriban](https://github.com/scriban/scriban/blob/master/doc/language.md).
 
 Scriban allows me to not depend heavily on the Razor Rendering Engine, so this approach makes it cross-platform (Web, Desktop, Mobile, etc.) whilst harnessing all the power of C# and a more extensible and extensive syntax than what you would have to do in the Static HTML Example.
 
