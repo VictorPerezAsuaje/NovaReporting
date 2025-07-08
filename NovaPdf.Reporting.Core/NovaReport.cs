@@ -9,14 +9,14 @@ public interface INovaReport
     string Name { get; }
     ReportLayout Layout { get; }
     ReportFormat Format { get; }
-    Dictionary<string, IReportParameter> Parameters { get; }
+    Dictionary<string, ReportParameter> Parameters { get; }
     Dictionary<string, IReportDataSet> DataSets { get; }
     void Init();
     Result Validate();
 
     void AddDataSet<T>(T dataset) where T : class, IReportDataSet;
-    void AddParameter<T>(T parameter) where T : class, IReportParameter;
-    T GetParameter<T>(string name);
+    void AddParameter(ReportParameter parameter);
+    T GetParameterValue<T>(string name);
     T GetDataSet<T>() where T : class, IReportDataSet;
     
     Task<Result<byte[]>> GeneratePdfAsync(Action<NovaReportRenderingData> options);
@@ -28,7 +28,7 @@ public abstract class NovaReport : INovaReport
     public abstract string Name { get; }
     public ReportLayout Layout { get; protected set; } = ReportLayout.Vertical;
     public ReportFormat Format { get; protected set; } = ReportFormat.A4;
-    public Dictionary<string, IReportParameter> Parameters { get; protected set; } = [];
+    public Dictionary<string, ReportParameter> Parameters { get; protected set; } = [];
     public Dictionary<string, IReportDataSet> DataSets { get; protected set; } = [];
     protected IServiceProvider _provider { get; set; }
 
@@ -46,7 +46,7 @@ public abstract class NovaReport : INovaReport
     protected T GetService<T>() where T : notnull
         => _provider.GetRequiredService<T>();
 
-    public void AddParameter<T>(T parameter) where T : class, IReportParameter
+    public void AddParameter(ReportParameter parameter)
     {
         if (Parameters.ContainsKey(parameter.Name))
             throw new Exception($"A parameter with the name '{parameter.Name}' already exists for the Report '{Name}'");
@@ -54,7 +54,7 @@ public abstract class NovaReport : INovaReport
         Parameters.Add(parameter.Name, parameter);
     }
 
-    public T GetParameter<T>(string name)
+    public T GetParameterValue<T>(string name)
     {
         if (!Parameters.ContainsKey(name))
             throw new Exception($"A parameter with the name '{name}' does not exist for the Report '{Name}'");

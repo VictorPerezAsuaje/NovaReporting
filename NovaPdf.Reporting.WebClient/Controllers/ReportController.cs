@@ -118,9 +118,9 @@ public class ReportController : Controller
         }
 
         string totaSaleRowTemplate = System.IO.File.ReadAllText(Path.Combine(reportFolder, "total-sale-row.html"));
-        totaSaleRowTemplate = totaSaleRowTemplate.Replace("{{ SalesTargetIconClass }}", $"{(salesDS.SumTotalSales < salesReport.GetParameter<decimal>("SalesTarget") ? "bg-danger" : "bg-success")}");
+        totaSaleRowTemplate = totaSaleRowTemplate.Replace("{{ SalesTargetIconClass }}", $"{(salesDS.SumTotalSales < salesReport.GetParameterValue<decimal>("SalesTarget") ? "bg-danger" : "bg-success")}");
         totaSaleRowTemplate = totaSaleRowTemplate.Replace("{{ SumTotalSales }}", $"{salesDS.SumTotalSales.ToString("N2")}");
-        totaSaleRowTemplate = totaSaleRowTemplate.Replace("{{ SalesTarget }}", $"{salesReport.GetParameter<decimal>("SalesTarget").ToString("N2")}");
+        totaSaleRowTemplate = totaSaleRowTemplate.Replace("{{ SalesTarget }}", $"{salesReport.GetParameterValue<decimal>("SalesTarget").ToString("N2")}");
         totaSaleRowTemplate = totaSaleRowTemplate.Replace("{{ SumTotalReturns }}", $"{salesDS.SumTotalReturns.ToString("N2")}");
         totaSaleRowTemplate = totaSaleRowTemplate.Replace("{{ SumNetSales }}", $"{salesDS.SumNetSales.ToString("N2")}");
         totaSaleRowTemplate = totaSaleRowTemplate.Replace("{{ SumNewCustomers }}", $"{salesDS.SumNewCustomers}");
@@ -209,9 +209,9 @@ public class ReportController : Controller
         }
 
         string totaSaleRowTemplate = System.IO.File.ReadAllText(Path.Combine(reportFolder, "total-sale-row.html"));
-        totaSaleRowTemplate = totaSaleRowTemplate.Replace("{{ SalesTargetIconClass }}", $"{(salesDS.SumTotalSales < salesReport.GetParameter<decimal>("SalesTarget") ? "bg-danger" : "bg-success")}");
+        totaSaleRowTemplate = totaSaleRowTemplate.Replace("{{ SalesTargetIconClass }}", $"{(salesDS.SumTotalSales < salesReport.GetParameterValue<decimal>("SalesTarget") ? "bg-danger" : "bg-success")}");
         totaSaleRowTemplate = totaSaleRowTemplate.Replace("{{ SumTotalSales }}", $"{salesDS.SumTotalSales.ToString("N2")}");
-        totaSaleRowTemplate = totaSaleRowTemplate.Replace("{{ SalesTarget }}", $"{salesReport.GetParameter<decimal>("SalesTarget").ToString("N2")}");
+        totaSaleRowTemplate = totaSaleRowTemplate.Replace("{{ SalesTarget }}", $"{salesReport.GetParameterValue<decimal>("SalesTarget").ToString("N2")}");
         totaSaleRowTemplate = totaSaleRowTemplate.Replace("{{ SumTotalReturns }}", $"{salesDS.SumTotalReturns.ToString("N2")}");
         totaSaleRowTemplate = totaSaleRowTemplate.Replace("{{ SumNetSales }}", $"{salesDS.SumNetSales.ToString("N2")}");
         totaSaleRowTemplate = totaSaleRowTemplate.Replace("{{ SumNewCustomers }}", $"{salesDS.SumNewCustomers}");

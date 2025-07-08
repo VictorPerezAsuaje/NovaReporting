@@ -19,13 +19,13 @@ public class SalesNovaReport : NovaReport
         if (!File.Exists(logoPath))
             throw new Exception($"The path '{logoPath}' does not contain a file.");
 
-        AddParameter(new ReportParameter<string>("Logo", Convert.ToBase64String(File.ReadAllBytes(logoPath))));
-        AddParameter(new ReportParameter<string>("ReportTitle", "Q2 2025 Sales Performance"));
-        AddParameter(new ReportParameter<string>("CompanyName", "Nova Reporting"));
-        AddParameter(new ReportParameter<DateTime>("CurrentDate", DateTime.UtcNow));
-        AddParameter(new ReportParameter<DateTime>("DateStart", new DateTime(2025, 1, 1)));
-        AddParameter(new ReportParameter<DateTime>("DateEnd", new DateTime(2025, 1, 1)));
-        AddParameter(new ReportParameter<decimal>("SalesTarget", 1500000m));
+        AddParameter(new ("Logo", Convert.ToBase64String(File.ReadAllBytes(logoPath))));
+        AddParameter(new ("ReportTitle", "Q2 2025 Sales Performance"));
+        AddParameter(new ("CompanyName", "Nova Reporting"));
+        AddParameter(new ("CurrentDate", DateTime.UtcNow));
+        AddParameter(new ("DateStart", new DateTime(2025, 1, 1)));
+        AddParameter(new ("DateEnd", new DateTime(2025, 1, 1)));
+        AddParameter(new ("SalesTarget", 1500000m));
 
         var salesSummary = new SalesSummaryDS
         {

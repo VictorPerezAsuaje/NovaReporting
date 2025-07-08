@@ -8,7 +8,7 @@ public abstract class BaseReportView<TModel> : RazorPage<TModel> where TModel : 
 {
     public T Parameter<T>(string name)
     {
-        return Model.GetParameter<T>(name);
+        return Model.GetParameterValue<T>(name);
     }
 
     public T DataSet<T>() where T : class, IReportDataSet
