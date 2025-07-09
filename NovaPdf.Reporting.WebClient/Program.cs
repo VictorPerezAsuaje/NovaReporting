@@ -1,9 +1,10 @@
 using NovaPdf.Reporting.Razor;
+using NovaPdf.Reporting.Core;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
 builder.Services.AddControllersWithViews();
+builder.Services.AddDockerNovaReportSupport();
 builder.Services.AddScoped<IViewRenderer, ViewToStringRenderer>();
 
 var app = builder.Build();

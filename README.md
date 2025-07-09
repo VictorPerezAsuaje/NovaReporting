@@ -26,6 +26,7 @@ The core idea is to simplify report generation by using technologies most develo
 
 ### 🚀 Getting Started
 
+#### Standard Debug Environment 
 If you're building a .NET Core Web Application (MVC, API, Blazor, etc.), NovaReporting integrates effortlessly. You can use Razor views or any server-rendered HTML as your report source. 
 
 You can see an example of using Razor here: [Razor Example](#razor-example)
@@ -39,6 +40,76 @@ And of course you can choose another HTML Template Renderer you want, in fact I'
 You can see an example of using static HTML here: [Platform-Agnostic HTML Template Renderer Example (Scriban)](#platform-agnostic-html-template-renderer-example)
 
 The following scenarios are simple ones, with as little abstractions as possible for it to show as much of the important code as possible. Feel free to create the abstractions you need, group, extract or refactor it... The sky is the limit 🚀
+
+#### Docker
+
+If you are using docker, you will need to take a few steps before being able to launch the project. This is specially relevant for deployment.
+
+1. Create / modify your Dockerfile to use the suggested base image by the [Playwright docs](https://playwright.dev/docs/docker). You can use the Dockerfile on the sample WebClient project as a reference.
+
+> FROM mcr.microsoft.com/playwright/dotnet:v1.53.0-noble AS base  
+
+2. Update your .csproj to add the tag on the main PropertyGroup following the instructions from [Playwright - Bundle drivers for different platforms docs](https://playwright.dev/dotnet/docs/library#bundle-drivers-for-different-platforms). It would look something like:
+
+```
+<PropertyGroup>
+  <TargetFramework>net8.0</TargetFramework>
+	<PlaywrightPlatform>all</PlaywrightPlatform>
+	
+	<!-- ... The rest of your config ... -->
+	
+  </PropertyGroup>
+```
+
+3. In your Program.cs use the ServiceCollection Extension method from the NovaPdf.Reporting.Core to guarantee the installation of the browser dependencies at runtime. It's no black magic nor a black box, you can see this step as well in the [Playwright - Install Browsers Via API docs](https://playwright.dev/dotnet/docs/browsers#install-browsers-via-api), so you don't need to depend on this extension to install the dependencies, you can create your own or adapt it as you see fit.
+
+```
+
+var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddControllersWithViews();
+
+// Other services you may have
+
+/* ⏩ NovaReport Service Registration ⏪ */
+builder.Services.AddDockerNovaReportSupport();
+builder.Services.AddScoped<IViewRenderer, ViewToStringRenderer>();
+
+// Other services you may have
+
+var app = builder.Build();
+
+```
+
+4. If you want to test it on your development environment, make sure to have docker configured as a launchSettings if you are using VS22. This is an example that you can find under NovaPdf.Reporting.WebClient > Properties > launchSettings.json:
+
+```
+
+{
+  "profiles": {
+  
+    /******* Other Launch Profiles you may already have *******/
+	
+    "Container (Dockerfile)": {
+      "commandName": "Docker",
+      "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}",
+      "environmentVariables": {
+        "ASPNETCORE_HTTPS_PORTS": "8081",
+        "ASPNETCORE_HTTP_PORTS": "8080"
+      },
+      "publishAllPorts": true,
+      "useSSL": true
+    }
+  }
+}
+
+```
+
+You can also right-click on the project, Add > Docker Support and it will auto-generate a Dockerfile with the launch settings pre-enabled by default.
+
+> ⚠ **Important** ⚠
+> If you are using Windows you will also need to download [Docker Desktop](https://www.docker.com/products/docker-desktop/), as VS22 will warn you that it's a requirement to run it on a Docker environment.
+
 
 ### Razor Example
 
