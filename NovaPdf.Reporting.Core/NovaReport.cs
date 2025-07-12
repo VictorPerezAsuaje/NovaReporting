@@ -87,7 +87,7 @@ public abstract class NovaReport : INovaReport
         NovaReportRenderingData data = new();
         options(data);
 
-        using var playwright = await Playwright.CreateAsync();
+        var playwright = GetService<IPlaywright>();
         await using var browser = await playwright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions { Headless = true });
         var page = await browser.NewPageAsync();
 

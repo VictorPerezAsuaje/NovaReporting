@@ -4,6 +4,7 @@ using NovaPdf.Reporting.Core;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllersWithViews();
+builder.Services.AddNovaReport();
 builder.Services.AddDockerNovaReportSupport();
 builder.Services.AddScoped<IViewRenderer, ViewToStringRenderer>();
 
